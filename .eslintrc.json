@@ -1,0 +1,24 @@
+{
+  "env": {
+    "browser": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "jsx": true
+  },
+  "plugins": ["@typescript-eslint", "preact"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:preact/recommended"
+  ],
+  "rules": {
+    "no-console": "error",
+    "quotes": ["error", "double"],
+    "indent": ["error", 2],
+    "react/jsx-no-bind": "off",
+    "comma-dangle": "off",
+    "react/jsx-indent-props": ["error", 2]
+  }
+}
