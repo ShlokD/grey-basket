@@ -20,7 +20,9 @@ export function App() {
     <>
       <AppContextProvider>
         <Header />
-        <View />
+        <main className="flex flex-col h-full w-full">
+          <View />
+        </main>
         <Footer />
       </AppContextProvider>
     </>

@@ -3,7 +3,7 @@ import star from "../assets/star.png";
 import flag from "../assets/flag.png";
 
 const Footer = () => (
-  <div className="fixed bottom-0 w-full flex p-6 items-center justify-around border border-white">
+  <footer className="fixed bottom-0 w-full flex p-6 items-center justify-around border border-white">
     <a href="/">
       <div className="bg-white p-3 rounded-full">
         <img src={pen} width="36" height="36" alt="Add Note" />
@@ -19,7 +19,7 @@ const Footer = () => (
         <img src={flag} width="36" height="36" alt="Reminders" />
       </div>
     </a>
-  </div>
+  </footer>
 );
 
 export default Footer;

@@ -23,8 +23,8 @@ const createDB = (): Promise<IDBDatabase | null> => {
 
       request.onupgradeneeded = (ev: Event) => {
         const db = (ev?.target as IDBOpenDBRequest)?.result;
-        db?.createObjectStore("notes", { keyPath: "id" });
-        db?.createObjectStore("folders", { keyPath: "id" });
+        db?.createObjectStore("notes");
+        db?.createObjectStore("folders");
         resolve(db);
       };
     });
