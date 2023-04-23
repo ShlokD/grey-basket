@@ -1,8 +1,38 @@
 import { createContext, JSX } from "preact";
-import { useContext, useState, useEffect } from "preact/hooks";
-const AppContext = createContext({});
+import { useContext, useState } from "preact/hooks";
+
+type AppContextType = {
+  db?: IDBDatabase;
+};
+const AppContext = createContext<AppContextType>({});
 
 export const useAppContext = () => useContext(AppContext);
+
+const createDB = (): Promise<IDBDatabase | null> => {
+  if ("indexedDB" in window) {
+    const request = window.indexedDB.open("notes-db", 1);
+
+    const p = new Promise<IDBDatabase>((resolve, reject) => {
+      request.onsuccess = (ev: Event) => {
+        const db = (ev?.target as IDBOpenDBRequest)?.result;
+        resolve(db);
+      };
+      request.onerror = (err) => {
+        reject(err);
+      };
+
+      request.onupgradeneeded = (ev: Event) => {
+        const db = (ev?.target as IDBOpenDBRequest)?.result;
+        db?.createObjectStore("notes", { keyPath: "id" });
+        db?.createObjectStore("folders", { keyPath: "id" });
+        resolve(db);
+      };
+    });
+    return p;
+  }
+
+  return Promise.resolve(null);
+};
 
 export const AppContextProvider = ({
   children,
@@ -11,22 +41,16 @@ export const AppContextProvider = ({
 }) => {
   const [db, setDB] = useState<IDBDatabase>();
 
-  useEffect(() => {
-    if ("indexedDB" in window) {
-      const request = window.indexedDB.open("notes-db", 1);
-
-      request.onsuccess = (ev: Event) => {
-        setDB((ev?.target as IDBOpenDBRequest)?.result);
-      };
-
-      request.onupgradeneeded = (ev: Event) => {
-        const db = (ev?.target as IDBOpenDBRequest)?.result;
-        db?.createObjectStore("notes", { keyPath: "id" });
-        db?.createObjectStore("folders", { keyPath: "id" });
-        setDB(db);
-      };
+  const createAndSetDB = async () => {
+    const dbHandle = await createDB();
+    if (dbHandle) {
+      setDB(dbHandle);
     }
-  }, []);
+  };
+
+  if (!db) {
+    createAndSetDB();
+  }
 
   return <AppContext.Provider value={{ db }}>{children}</AppContext.Provider>;
 };
