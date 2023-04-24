@@ -3,8 +3,13 @@ import { useContext, useState } from "preact/hooks";
 
 type AppContextType = {
   db?: IDBDatabase;
+  currentFolder: string;
+  setCurrentFolder: (newFolder: string) => void;
 };
-const AppContext = createContext<AppContextType>({});
+const AppContext = createContext<AppContextType>({
+  currentFolder: "",
+  setCurrentFolder: () => "",
+});
 
 export const useAppContext = () => useContext(AppContext);
 
@@ -40,6 +45,7 @@ export const AppContextProvider = ({
   children?: JSX.Element[];
 }) => {
   const [db, setDB] = useState<IDBDatabase>();
+  const [currentFolder, setCurrentFolder] = useState<string>("Home");
 
   const createAndSetDB = async () => {
     const dbHandle = await createDB();
@@ -52,5 +58,9 @@ export const AppContextProvider = ({
     createAndSetDB();
   }
 
-  return <AppContext.Provider value={{ db }}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={{ db, currentFolder, setCurrentFolder }}>
+      {children}
+    </AppContext.Provider>
+  );
 };
