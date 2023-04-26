@@ -1,7 +1,12 @@
 import { useEffect, useState } from "preact/hooks";
 import { v4 } from "uuid";
 import { useAppContext } from "../context";
-import { addFolderToDb, addNoteToDB, getFolders } from "../shared/db-utils";
+import {
+  addFolderToDb,
+  addNoteToDB,
+  deleteFolderFromDB,
+  getFolders,
+} from "../shared/db-utils";
 import { NotesForm, NotesList } from "../shared/notes";
 import type { Folder, Note } from "../types";
 import { AddButton } from "./add-button";
@@ -29,8 +34,21 @@ export const Notes = () => {
     }
   };
 
-  const handleFolderClick = async (name: string) => {
+  const handleFolderClick = (name: string) => {
     setCurrentFolder(name);
+  };
+
+  const handleFolderDelete = async (folder: Folder) => {
+    const newFolders = folders.filter((f) => f.name !== folder.name);
+    setCurrentFolder(folders[0].name);
+    setFolders(newFolders);
+    if (db) {
+      deleteFolderFromDB(
+        db,
+        folder.id,
+        notes.filter((note) => note.folder === folder.name)
+      );
+    }
   };
 
   const onAddNote = ({
@@ -108,6 +126,7 @@ export const Notes = () => {
         <FolderList
           folders={folders}
           handleFolderClick={handleFolderClick}
+          handleFolderDelete={handleFolderDelete}
           showFoldersForm={showFoldersForm}
           currentFolder={currentFolder}
         />

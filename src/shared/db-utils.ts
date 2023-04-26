@@ -55,3 +55,16 @@ export const updateNoteInDB = (db: IDBDatabase, note: Note) => {
   const store = db.transaction("notes", "readwrite").objectStore("notes");
   store.put(note, note.id);
 };
+
+export const deleteFolderFromDB = (
+  db: IDBDatabase,
+  id: string,
+  notes: Note[]
+) => {
+  const store = db.transaction("notes", "readwrite").objectStore("notes");
+  notes.forEach((note) => {
+    store.delete(note.id);
+  });
+  const folders = db.transaction("folders", "readwrite").objectStore("folders");
+  folders.delete(id);
+};

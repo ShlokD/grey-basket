@@ -1,6 +1,7 @@
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import type { Folder } from "../types";
+
 export const FolderForm = ({
   onClose,
   onCancel,
@@ -54,16 +55,62 @@ export const FolderList = ({
   currentFolder,
   showFoldersForm,
   handleFolderClick,
+  handleFolderDelete,
 }: {
   folders: Folder[];
   currentFolder: string;
   showFoldersForm: boolean;
   handleFolderClick: (name: string) => void;
-}): JSX.Element | null =>
-  folders?.length > 0 ? (
+  handleFolderDelete: (folder: Folder) => void;
+}): JSX.Element | null => {
+  const [showAlert, setShowAlert] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
+
+  const doDeleteFolder = (folder: Folder) => {
+    setFolderToDelete(folder);
+    setShowAlert(true);
+  };
+
+  const handleCancel = () => {
+    setShowAlert(false);
+    setFolderToDelete(null);
+  };
+
+  const handleProceed = () => {
+    setShowAlert(false);
+    if (folderToDelete) {
+      handleFolderDelete(folderToDelete);
+    }
+    setFolderToDelete(() => null);
+  };
+
+  return folders?.length > 0 ? (
     <>
+      {showAlert && (
+        <div
+          className="z-10 absolute center bg-white text-black flex items-center justify-center flex-col absolute my-2 rounded-lg"
+          style={{
+            top: "50%",
+            left: "50%",
+            marginRight: "-50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <p className="font-bold text-center p-2">
+            Deleting a folder will also delete the notes in it.
+          </p>
+          <div className="flex items-center justify-around my-2">
+            <button className="p-2 bg-blue-300 mx-2" onClick={handleCancel}>
+              Cancel
+            </button>
+            <button className="p-2 bg-blue-300 mx-2" onClick={handleProceed}>
+              Proceed
+            </button>
+          </div>
+        </div>
+      )}
       <div
-        className={`flex items-center w-full h-1/12 overflow-x-auto overflow-y-visible my-2 p-2 ${
+        className={`flex items-start w-full h-1/12 overflow-x-auto overflow-y-visible my-2 p-2 ${
           showFoldersForm ? "hidden" : ""
         }`}
       >
@@ -79,10 +126,27 @@ export const FolderList = ({
             >
               <img src="/folder.png" alt="Folder" height="36" width="36" />
             </button>
-            <p className="text-white">{folder.name || "Home"}</p>
+            <div className="flex flex-col items-center">
+              <p className="text-white inline">{folder.name || "Home"}</p>
+              {folder.name !== "Home" && (
+                <button
+                  className="bg-white p-2 rounded-full inline mx-2"
+                  onClick={() => doDeleteFolder(folder)}
+                  aria-label="Delete folder"
+                >
+                  <img
+                    src="/trash.png"
+                    height="16px"
+                    width="16px"
+                    alt="Delete icon"
+                  />
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
       <hr className="border border-white w-full" />
     </>
   ) : null;
+};
