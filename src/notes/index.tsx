@@ -1,67 +1,11 @@
-import { useAppContext } from "../context";
 import { useEffect, useState } from "preact/hooks";
-import { AddButton } from "./add-button";
-import { NotesList, NotesForm } from "./notes";
-import { FolderForm, FolderList } from "./folder";
 import { v4 } from "uuid";
-
-import type { Note, Folder } from "./types";
-
-const getNotes = (db: IDBDatabase) => {
-  const store = db.transaction("notes").objectStore("notes");
-  const notes: Note[] = [];
-  const p = new Promise<Note[]>((resolve) => {
-    store.openCursor().onsuccess = (event: Event) => {
-      const cursor: IDBCursorWithValue = (event?.target as IDBRequest)?.result;
-      if (cursor) {
-        notes.push(cursor.value);
-        cursor.continue();
-      }
-      else {
-        resolve(notes);
-      }
-    };
-  });
-  return p;
-};
-
-const getFolders = (db: IDBDatabase) => {
-  const store = db.transaction("folders").objectStore("folders");
-  const folders: Folder[] = [{ id: "home", name: "Home" }];
-  const p = new Promise<Folder[]>((resolve) => {
-    store.openCursor().onsuccess = (event: Event) => {
-      const cursor: IDBCursorWithValue = (event?.target as IDBRequest)?.result;
-      if (cursor) {
-        folders.push(cursor.value);
-        cursor.continue();
-      }
-      else {
-        resolve(folders);
-      }
-    };
-  });
-  return p;
-};
-
-const addNoteToDB = (db: IDBDatabase, note: Note) => {
-  const store = db.transaction("notes", "readwrite").objectStore("notes");
-  store.add(note, note.id);
-};
-
-const deleteNoteFromDB = (db: IDBDatabase, id: string) => {
-  const store = db.transaction("notes", "readwrite").objectStore("notes");
-  store.delete(id);
-};
-
-const addFolderToDb = (db: IDBDatabase, folder: Folder) => {
-  const store = db.transaction("folders", "readwrite").objectStore("folders");
-  store.add({ id: folder.id, name: folder.name }, folder.id);
-};
-
-const updateNoteInDB = (db: IDBDatabase, note: Note) => {
-  const store = db.transaction("notes", "readwrite").objectStore("notes");
-  store.put(note, note.id);
-};
+import { useAppContext } from "../context";
+import { addFolderToDb, addNoteToDB, getFolders } from "../shared/db-utils";
+import { NotesForm, NotesList } from "../shared/notes";
+import type { Folder, Note } from "../types";
+import { AddButton } from "./add-button";
+import { FolderForm, FolderList } from "./folder";
 
 const AddNote = () => (
   <h2 className="font-bold text-yellow-300 text-3xl text-center">
@@ -70,20 +14,13 @@ const AddNote = () => (
 );
 
 export const Notes = () => {
-  const [notes, setNotes] = useState<Note[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [showNotesForm, setShowNotesForm] = useState(false);
   const [showFoldersForm, setShowFoldersForm] = useState(false);
   const { currentFolder, setCurrentFolder } = useAppContext();
 
-  const { db } = useAppContext();
-
-  const getNotesFromDb = async () => {
-    if (db) {
-      const notesFromDB = await getNotes(db);
-      setNotes(notesFromDB);
-    }
-  };
+  const { db, notes, setNotes, handleDeleteNote, handleUpdateNote } =
+    useAppContext();
 
   const getFoldersFromDb = async () => {
     if (db) {
@@ -99,17 +36,20 @@ export const Notes = () => {
   const onAddNote = ({
     title,
     description,
+    bgColor,
   }: {
     title: string;
     description: string;
+    bgColor: string;
   }) => {
     const note = {
       id: v4(),
       folder: currentFolder,
       title,
       description,
+      bgColor,
     };
-    setNotes((prev) => [...prev, note]);
+    setNotes((prev: Note[]) => [...prev, note]);
     setShowNotesForm(false);
     if (db) {
       addNoteToDB(db, note);
@@ -125,36 +65,6 @@ export const Notes = () => {
     }
   };
 
-  const handleDeleteNote = (id: string) => {
-    setNotes((prev) => prev.filter((note) => note.id !== id));
-    if (db) {
-      deleteNoteFromDB(db, id);
-    }
-  };
-
-  const handleUpdateNote = (id: string, isFavorited?: boolean) => {
-    const note = notes.find((note) => note.id === id);
-    if (note) {
-      const noteIndex = notes.findIndex((note) => note.id === id);
-      const newNote = {
-        ...note,
-        favorite: isFavorited,
-      };
-      const newNotes = notes.slice();
-      newNotes[noteIndex] = newNote;
-      setNotes(newNotes);
-      if (db) {
-        updateNoteInDB(db, newNote);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (db) {
-      getNotesFromDb();
-    }
-  }, [db]);
-
   useEffect(() => {
     if (db) {
       getFoldersFromDb();
@@ -162,6 +72,14 @@ export const Notes = () => {
   }, [db]);
 
   const filteredNotes = notes.filter((note) => note.folder === currentFolder);
+
+  if (!db) {
+    return (
+      <h2 className="font-bold text-yellow-300 text-3xl text-center">
+        Loading...
+      </h2>
+    );
+  }
 
   return (
     <>
@@ -216,3 +134,5 @@ export const Notes = () => {
     </>
   );
 };
+
+export default Notes;

@@ -4,6 +4,7 @@ export type Note = {
   description: string;
   folder: string;
   favorite?: boolean;
+  bgColor: string;
 };
 
 export type Folder = {

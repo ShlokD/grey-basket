@@ -20,6 +20,7 @@
     "indent": ["error", 2],
     "react/jsx-no-bind": "off",
     "comma-dangle": "off",
-    "react/jsx-indent-props": ["error", 2]
+    "react/jsx-indent-props": ["error", 2],
+    "jsx-a11y/label-has-associated-control": ["off"]
   }
 }

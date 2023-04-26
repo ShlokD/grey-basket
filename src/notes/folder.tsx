@@ -1,6 +1,6 @@
-import type { Folder } from "./types";
-import { useState } from "preact/hooks";
 import type { JSX } from "preact";
+import { useState } from "preact/hooks";
+import type { Folder } from "../types";
 export const FolderForm = ({
   onClose,
   onCancel,
@@ -63,7 +63,7 @@ export const FolderList = ({
   folders?.length > 0 ? (
     <>
       <div
-        className={`flex items-center w-full h-1/12 overflow-x-scroll my-2 p-2 ${
+        className={`flex items-center w-full h-1/12 overflow-x-auto overflow-y-visible my-2 p-2 ${
           showFoldersForm ? "hidden" : ""
         }`}
       >

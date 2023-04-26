@@ -30,7 +30,7 @@ export const AddButton = ({
   ) : (
     <button
       aria-label="Add a Note"
-      className="px-6 py-4 bg-blue-300 my-4 text-5xl rounded-full fixed bottom-32 z-auto right-4"
+      className="px-4 py-2 bg-blue-300 my-4 text-5xl rounded-full fixed bottom-32 z-auto right-4"
       onClick={() => setExpanded((prev) => !prev)}
     >
       +
